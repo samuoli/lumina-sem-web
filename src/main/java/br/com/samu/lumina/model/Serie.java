@@ -1,19 +1,30 @@
 package br.com.samu.lumina.model;
 
-import br.com.samu.lumina.service.ConsultaChatGPT;
-import com.fasterxml.jackson.annotation.JsonAlias;
+import br.com.samu.lumina.service.TradutorIA;
+import jakarta.persistence.*;
 
-import java.util.Optional;
-import java.util.OptionalDouble;
+import java.util.ArrayList;
+import java.util.List;
 
+@Entity
+@Table(name = "series")
 public class Serie {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Column(unique = true)
     private String titulo;
     private Integer totalTemporadas;
     private Double avaliacao;
+    @Enumerated(EnumType.STRING)
     private Categoria genero;
     private String atores;
     private String poster;
     private String sinopse;
+    @Transient
+    private List<Episodio> episodios = new ArrayList<>();
+
+    public Serie() {}
 
     public  Serie(DadosSerie dadosSerie){
         this.titulo = dadosSerie.titulo();
@@ -29,10 +40,26 @@ public class Serie {
         }
 
         if (dadosSerie.sinopse() != null && !dadosSerie.sinopse().equalsIgnoreCase("N/A")) {
-            this.sinopse = ConsultaChatGPT.obterTraducao(dadosSerie.sinopse());
+            this.sinopse = TradutorIA.obterTraducao(dadosSerie.sinopse());
         } else {
             this.sinopse = "Sinopse não disponível.";
         }
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public List<Episodio> getEpisodios() {
+        return episodios;
+    }
+
+    public void setEpisodios(List<Episodio> episodios) {
+        this.episodios = episodios;
     }
 
     public String getTitulo() {

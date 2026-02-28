@@ -9,7 +9,7 @@ import java.net.http.HttpResponse;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
-public class ConsultaChatGPT {
+public class TradutorIA {
     public static String obterTraducao(String texto) {
         ObjectMapper mapper = new ObjectMapper();
         HttpClient client = HttpClient.newHttpClient();
@@ -18,7 +18,14 @@ public class ConsultaChatGPT {
         String textoCodificado = URLEncoder.encode(texto, StandardCharsets.UTF_8);
         String langPair = URLEncoder.encode("en|pt-br", StandardCharsets.UTF_8);
 
-        String url = "https://api.mymemory.translated.net/get?q=" + textoCodificado + "&langpair=" + langPair;
+        // Obtendo a URL da variável de ambiente
+        String baseUrl = System.getenv("MYMEMORY_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            System.out.println("A variável de ambiente MYMEMORY_URL não está definida.");
+            return texto; // Retorna o texto original se a variável não estiver definida
+        }
+
+        String url = baseUrl + "?q=" + textoCodificado + "&langpair=" + langPair;
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))

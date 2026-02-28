@@ -3,8 +3,10 @@ package br.com.samu.lumina.principal;
 import br.com.samu.lumina.model.DadosSerie;
 import br.com.samu.lumina.model.DadosTemporada;
 import br.com.samu.lumina.model.Serie;
+import br.com.samu.lumina.repository.SerieRepository;
 import br.com.samu.lumina.service.ConsumoApi;
 import br.com.samu.lumina.service.ConverteDados;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -12,7 +14,7 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
-public class Principal {
+public class Principal{
 
     private Scanner leitura = new Scanner(System.in);
     private ConsumoApi consumo = new ConsumoApi();
@@ -20,7 +22,12 @@ public class Principal {
     private final String ENDERECO = "https://www.omdbapi.com/?t=";
     private final String API_KEY = "&apikey=6585022c";
     private  List<DadosSerie> dadosSeries = new ArrayList<>();
-    List<Serie> series = new ArrayList<>();
+    private SerieRepository repositorio;
+
+    public Principal(SerieRepository repositorio) {
+        this.repositorio = repositorio;
+    }
+
 
     public void exibeMenu() {
         var opcao = -1;
@@ -66,10 +73,10 @@ public class Principal {
 
     private void buscarSerieWeb() {
         DadosSerie dados = getDadosSerie();
-        // Ao criar a 'Serie', o construtor dela vai chamar o tradutor
         Serie serie = new Serie(dados);
-        series.add(serie); // Adiciona série traduzida na lista
-        System.out.println(serie);
+//        DadosSerie.add(dados);
+        repositorio.save(serie);
+        System.out.println(dados);
     }
 
     private DadosSerie getDadosSerie() {
@@ -99,10 +106,7 @@ public class Principal {
 
     private void listarSeriesBuscadas(){
 
-
-        series = dadosSeries.stream()
-                        .map(d -> new Serie(d))
-                                .collect(Collectors.toList());
+        List<Serie> series = repositorio.findAll();
         series.stream()
                 .sorted(Comparator.comparing(Serie::getGenero))
                 .forEach(System.out::println);
